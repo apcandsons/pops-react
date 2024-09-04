@@ -1,1 +1,1 @@
-export * from './components/Policy'
+export { default as Policy } from './components/Policy'

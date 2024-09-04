@@ -1,6 +1,6 @@
 {
   "name": "pops-react",
-  "version": "1.0.1",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,8 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/material": "^6.0.2"
+    "@mui/material": "^6.0.2",
+    "markdown-to-jsx": "^7.5.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",

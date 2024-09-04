@@ -1,6 +1,6 @@
 {
   "organizeImportsSkipDestructiveCodeActions": false,
-  "printWidth": 120,
+  "printWidth": 105,
   "semi": false,
   "singleQuote": true,
   "tabWidth": 4,
