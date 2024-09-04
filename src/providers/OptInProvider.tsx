@@ -1,6 +1,6 @@
 import { Fragment, ReactNode, useEffect, useState } from 'react'
 import { DEFAULT_BASE_URL } from '../config'
-import OptInDialog from './OptInDialog'
+import { OptInDialog } from '../index'
 
 interface PolicyProviderProps {
     serviceId: string
