@@ -19,7 +19,7 @@ export default function Policy({ serviceId, policyKey, className, _baseUrlOverri
     const baseUrl = _baseUrlOverride || DEFAULT_BASE_URL
 
     useEffect(() => {
-        const url = `${baseUrl}?sid=${serviceId}&pkey=${policyKey}`
+        const url = `${baseUrl}/api/policies?sid=${serviceId}&pkey=${policyKey}`
         ;(async () => {
             try {
                 const result = await fetch(new URL(url), {
