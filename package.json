@@ -1,6 +1,6 @@
 {
-  "name": "apcandsons/pops-react",
-  "version": "0.0.19",
+  "name": "@apcandsons/pops-react",
+  "version": "0.1.7",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -32,6 +32,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/apcandsons.com/pops-react.git"
+    "url": "git+https://github.com/apcandsons/pops-react.git"
   }
 }

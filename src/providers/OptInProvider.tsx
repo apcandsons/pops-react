@@ -1,13 +1,15 @@
 import { Fragment, ReactNode, useEffect, useState } from 'react'
 import { DEFAULT_BASE_URL } from '../config'
 import { OptInDialog } from '../index'
+import IOptInRequest from '../models/OptInRequest.dto'
 
 interface PolicyProviderProps {
     serviceId: string
     userId: string
     userProperties?: { [key: string]: string | number | boolean | null | undefined }
     children: ReactNode
-    _baseUrlOverride?: string
+    apiBaseUrl?: string
+    markdownClassName?: string
 }
 
 export default function OptInProvider({
@@ -15,17 +17,16 @@ export default function OptInProvider({
     userId,
     userProperties,
     children,
-    _baseUrlOverride,
+    apiBaseUrl,
+    markdownClassName,
 }: PolicyProviderProps) {
-    const [open, setOpen] = useState(false)
-    const [title, setTitle] = useState('')
-    const [content, setContent] = useState('')
-    const [csrfToken, setCsrfToken] = useState('')
-    const baseUrl = _baseUrlOverride || DEFAULT_BASE_URL
+    const [optInRequests, setOptInRequests] = useState<(IOptInRequest & { open: boolean })[]>([])
+    const baseUrl = apiBaseUrl || DEFAULT_BASE_URL
 
     useEffect(() => {
         if (!serviceId || !userId) {
-            console.info('serviceId and userId are required')
+            console.error('serviceId and userId are required')
+            return
         }
         ;(async () => {
             try {
@@ -38,36 +39,20 @@ export default function OptInProvider({
                     },
                 })
                 const data = (await result.json()) as {
-                    optInRequests: {
-                        id: string
-                        title: string
-                        content: string
-                        startDisplayAt: Date
-                        enforceAfter?: Date
-                        csrfToken: string
-                    }[]
+                    optInRequests: IOptInRequest[]
                 }
                 if (data.optInRequests.length === 0) {
                     return
                 }
-                const optInReq = data.optInRequests[0]
-                setTitle(optInReq.title)
-                setContent(optInReq.content)
-                setCsrfToken(optInReq.csrfToken)
-                setOpen(true)
+                setOptInRequests(data.optInRequests.map((o) => ({ ...o, open: true })))
             } catch (e) {
                 const error = e as Error
                 console.error(`Error while fetching optInRequests: ${error.message}`)
-                console.error(`Stack trace`, error.stack)
             }
         })()
     }, [serviceId, userId, userProperties])
 
-    const handleClose = () => {
-        setOpen(false)
-    }
-
-    const handleSave = async (agree: boolean) => {
+    const handleOptIn = async (optInRequest: IOptInRequest, agree: boolean) => {
         const url = `${baseUrl}/api/opt-ins?sid=${serviceId}`
         const result = await fetch(new URL(url), {
             method: 'POST',
@@ -76,27 +61,32 @@ export default function OptInProvider({
             },
             body: JSON.stringify({
                 uid: userId,
-                csrfToken,
+                csrfToken: optInRequest.csrfToken,
                 agree,
             }),
         })
         if (result.status !== 200) {
             throw new Error(`Failed to save: ${result.statusText}`)
         }
-        handleClose()
+        // Remove the current optInRequest from the list
+        setOptInRequests(optInRequests.filter((o) => o.id !== optInRequest.id))
     }
 
     // This should cover up the entire screen when not hidden and show the dialog
     return (
         <Fragment>
             {children}
-            <OptInDialog
-                open={open}
-                title={title}
-                content={content}
-                onClose={handleClose}
-                onSave={handleSave}
-            />
+            {optInRequests.length > 0 && (
+                <OptInDialog
+                    open={optInRequests[0].open}
+                    optInRequest={optInRequests[0]}
+                    onClose={() =>
+                        setOptInRequests(optInRequests.filter((o) => o.id !== optInRequests[0].id))
+                    }
+                    onOptIn={handleOptIn}
+                    className={markdownClassName}
+                />
+            )}
         </Fragment>
     )
 }
