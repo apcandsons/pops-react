@@ -5,13 +5,49 @@ import IOptInRequest from '../models/OptInRequest.dto'
 
 interface PolicyProviderProps {
     serviceId: string
-    userId: string
-    userProperties?: { [key: string]: string | number | boolean | null | undefined }
+    userId?: string
+    userProperties?: { [key: string]: string | number | boolean | null | undefined } | string
     children: ReactNode
     apiBaseUrl?: string
     markdownClassName?: string
 }
 
+function checkAndGetUserId(
+    userProperties?: { [key: string]: string | number | boolean | null | undefined } | string,
+): string | undefined {
+    if (!userProperties || typeof userProperties !== 'string') {
+        return undefined
+    }
+    // Here we expect the userProperties to be a base64 encoded string with the userId
+    const possiblySignedParams = userProperties.split('.')
+    if (possiblySignedParams.length !== 2) {
+        throw new Error('userProperties were given, but not properly signed.')
+    }
+    let decodedData
+    try {
+        decodedData = JSON.parse(Buffer.from(possiblySignedParams[0], 'base64').toString('utf-8'))
+    } catch (e) {
+        const error = e as Error
+        throw new Error(
+            `userProperties were given, but is not a valid JSON or not base64 encoded format (${error.message})`,
+        )
+    }
+    if (!decodedData['userId']) {
+        throw new Error('`userId` is missing in the signed `userProperties`')
+    }
+    return decodedData['userId'].toString()
+}
+
+/**
+ * OptInProvider is a component that fetches the opt-in requests for a user and displays them as a dialog.
+ * @param serviceId
+ * @param userId
+ * @param userProperties - an object or a base64 encoded string
+ * @param children
+ * @param apiBaseUrl
+ * @param markdownClassName
+ * @constructor
+ */
 export default function OptInProvider({
     serviceId,
     userId,
@@ -22,15 +58,23 @@ export default function OptInProvider({
 }: PolicyProviderProps) {
     const [optInRequests, setOptInRequests] = useState<(IOptInRequest & { open: boolean })[]>([])
     const baseUrl = apiBaseUrl || DEFAULT_BASE_URL
+    userId = checkAndGetUserId(userProperties) || userId
 
     useEffect(() => {
-        if (!serviceId || !userId) {
-            console.error('serviceId and userId are required')
+        if (!serviceId) {
+            console.error('`serviceId` is missing')
+            return
+        }
+        if (!userId) {
+            console.error('`userId` are required either as a `props` value or in `userProperties`')
             return
         }
         ;(async () => {
             try {
-                const b64Props = Buffer.from(JSON.stringify(userProperties)).toString('base64')
+                const b64Props =
+                    typeof userProperties === 'string'
+                        ? userProperties
+                        : Buffer.from(JSON.stringify(userProperties)).toString('base64')
                 const url = `${baseUrl}/api/opt-ins?sid=${serviceId}&uid=${userId}&props=${b64Props}`
                 const result = await fetch(new URL(url), {
                     headers: {
@@ -63,6 +107,7 @@ export default function OptInProvider({
                 uid: userId,
                 csrfToken: optInRequest.csrfToken,
                 agree,
+                props: userProperties,
             }),
         })
         if (result.status !== 200) {
