@@ -64,7 +64,7 @@ export default function OptInDialog({
                         <Markdown>{optInRequest.content}</Markdown>
                     </div>
                 </div>
-                <div css={dialogActions}>
+                <div css={dialogFooter}>
                     <label css={formControlLabel}>
                         <input
                             type="checkbox"
@@ -73,28 +73,30 @@ export default function OptInDialog({
                         />
                         上記の内容に同意します
                     </label>
-                    <button
-                        css={buttonContained}
-                        onClick={() => onOptIn(optInRequest, agree)}
-                        disabled={!agree}
-                    >
-                        回答を保存
-                    </button>
-                    {!enforced ? (
-                        <ButtonWithOptions onPrimaryButtonClick={onClose} label="今はスキップする">
-                            <div style={{ width: '160px' }} onClick={handleSkipDays(1)}>
-                                1日間スキップする
-                            </div>
-                            <div onClick={handleSkipDays(3)}>3日間スキップする</div>
-                            <div onClick={handleSkipDays(7)}>7日間スキップする</div>
-                            <div onClick={handleSkipDays(14)}>14日間スキップする</div>
-                            <div onClick={handleSkipDays(30)}>30日間スキップする</div>
-                        </ButtonWithOptions>
-                    ) : (
-                        <button css={buttonTextDisabled} title="本内容は必ず同意いただく必要があります">
-                            今はスキップする
+                    <div css={dialogActions}>
+                        <button
+                            css={buttonContained}
+                            onClick={() => onOptIn(optInRequest, agree)}
+                            disabled={!agree}
+                        >
+                            回答を保存
                         </button>
-                    )}
+                        {!enforced ? (
+                            <ButtonWithOptions onPrimaryButtonClick={onClose} label="今はスキップする">
+                                <div style={{ width: '160px' }} onClick={handleSkipDays(1)}>
+                                    1日間スキップする
+                                </div>
+                                <div onClick={handleSkipDays(3)}>3日間スキップする</div>
+                                <div onClick={handleSkipDays(7)}>7日間スキップする</div>
+                                <div onClick={handleSkipDays(14)}>14日間スキップする</div>
+                                <div onClick={handleSkipDays(30)}>30日間スキップする</div>
+                            </ButtonWithOptions>
+                        ) : (
+                            <button css={buttonTextDisabled} title="本内容は必ず同意いただく必要があります">
+                                今はスキップする
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -133,6 +135,15 @@ const dialogContent = css`
     margin-bottom: 20px;
     max-height: 400px;
     overflow-y: scroll;
+`
+
+const dialogFooter = css`
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    @media (max-width: 1024px) {
+      flex-direction: column;
+    }
 `
 
 const dialogActions = css`
