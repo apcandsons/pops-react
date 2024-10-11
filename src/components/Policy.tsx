@@ -11,6 +11,7 @@ interface GetPolicyProps {
 
 interface PolicyProps extends Omit<GetPolicyProps, 'baseUrl'>{
     className?: string
+    onError?: (message: string) => void
     _baseUrlOverride?: string
 }
 
@@ -44,7 +45,7 @@ async function fetchPolicy({
         console.error(result.json())
         throw new Error(`Policy Unavailable: ${result.status}`)
     }
-    
+
     const data = await result.json() as {
         key: string
         version: number
@@ -92,6 +93,7 @@ export default function Policy({
     policyKey,
     className,
     version = 'latest',
+    onError,
     _baseUrlOverride
 }: PolicyProps) {
     const [text, setText] = useState('')
@@ -108,11 +110,9 @@ export default function Policy({
                 })
                 setText(`# ${data.title}\n\n${data.content}`)
             } catch (e) {
-                if ( e instanceof Error) {
-                    setText(e.message)
-                }else {
-                    setText('Policy Unavailable')
-                }
+                const message = e instanceof Error ? e.message : 'Policy Unavailable'
+                onError?.(message)
+                setText(message)
             }
         })()
     }, [])
