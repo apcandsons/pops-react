@@ -32,8 +32,7 @@ async function fetchPolicy({
     url.searchParams.append('sid', serviceId)
     url.searchParams.append('pkey', policyKey)
 
-    const useFutureVersions = version === 'next'
-    if (useFutureVersions) {
+    if (version === 'next') {
         url.searchParams.append('include', 'futureVersions')
     }
     const result = await fetch(url, {
@@ -61,7 +60,7 @@ async function fetchPolicy({
         }[]
     }
 
-    if (useFutureVersions) {
+    if (version === 'next') {
         if (data.futureVersions && data.futureVersions.length > 0) {
             const nextVersion = data.futureVersions[0]
             return {
