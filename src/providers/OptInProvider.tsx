@@ -14,7 +14,12 @@ interface PolicyProviderProps {
         open: boolean
         optInRequest: IOptInRequest
         onClose: () => void
-        onOptIn: (optInRequest: IOptInRequest, agree: boolean) => void
+        onOptIn: (
+            optInRequest: IOptInRequest,
+            agree: boolean,
+            onSuccess?: ()=> void,
+            onError?: (message:string)=> void
+        ) => Promise<void>
     }) => ReactElement
     onError?: (message: string) => void
 }
@@ -106,7 +111,12 @@ export default function OptInProvider({
         })()
     }, [serviceId, userId, userProperties])
 
-    const handleOptIn = async (optInRequest: IOptInRequest, agree: boolean) => {
+    const handleOptIn = async (
+        optInRequest: IOptInRequest,
+        agree: boolean,
+        onSuccess?: () => void,
+        _onError?: (message: string) => void
+    ) => {
         const url = `${baseUrl}/api/opt-ins?sid=${serviceId}`
         const result = await fetch(new URL(url), {
             method: 'POST',
@@ -122,9 +132,16 @@ export default function OptInProvider({
         })
         if (result.status !== 200) {
             onError?.(`Failed to save: ${result.statusText}`)
+            _onError?.(`Failed to save: ${result.statusText}`)
+            return
         }
         // Remove the current optInRequest from the list
+        onSuccess?.()
         setOptInRequests(optInRequests.filter((o) => o.id !== optInRequest.id))
+    }
+
+    const handleOnClose = () => {
+        setOptInRequests(optInRequests.filter((o) => o.id !== optInRequests[0].id))
     }
 
     // This should cover up the entire screen when not hidden and show the dialog
@@ -136,17 +153,13 @@ export default function OptInProvider({
                     dialogRender({
                         open: optInRequests[0].open,
                         optInRequest: optInRequests[0],
-                        onClose: () => {
-                            setOptInRequests(optInRequests.filter((o) => o.id !== optInRequests[0].id))
-                        },
+                        onClose: handleOnClose,
                         onOptIn: handleOptIn,
                     }) : (
                     <OptInDialog
                         open={optInRequests[0].open}
                         optInRequest={optInRequests[0]}
-                        onClose={() =>
-                            setOptInRequests(optInRequests.filter((o) => o.id !== optInRequests[0].id))
-                        }
+                        onClose={handleOnClose}
                         onOptIn={handleOptIn}
                         className={markdownClassName}
                     />
