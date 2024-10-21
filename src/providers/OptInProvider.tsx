@@ -10,6 +10,7 @@ interface PolicyProviderProps {
     children: ReactNode
     apiBaseUrl?: string
     markdownClassName?: string
+    onError?: (message: string) => void
 }
 
 function checkAndGetUserId(
@@ -55,18 +56,20 @@ export default function OptInProvider({
     children,
     apiBaseUrl,
     markdownClassName,
+    onError = console.error,
 }: PolicyProviderProps) {
     const [optInRequests, setOptInRequests] = useState<(IOptInRequest & { open: boolean })[]>([])
     const baseUrl = apiBaseUrl || DEFAULT_BASE_URL
     userId = checkAndGetUserId(userProperties) || userId
 
     useEffect(() => {
+        
         if (!serviceId) {
-            console.error('`serviceId` is missing')
+            onError?.('`serviceId` is missing')
             return
         }
         if (!userId) {
-            console.error('`userId` are required either as a `props` value or in `userProperties`')
+            onError?.('`userId` are required either as a `props` value or in `userProperties`')
             return
         }
         ;(async () => {
@@ -91,7 +94,7 @@ export default function OptInProvider({
                 setOptInRequests(data.optInRequests.map((o) => ({ ...o, open: true })))
             } catch (e) {
                 const error = e as Error
-                console.error(`Error while fetching optInRequests: ${error.message}`)
+                onError?.(`Error while fetching optInRequests: ${error.message}`)
             }
         })()
     }, [serviceId, userId, userProperties])
@@ -111,7 +114,7 @@ export default function OptInProvider({
             }),
         })
         if (result.status !== 200) {
-            throw new Error(`Failed to save: ${result.statusText}`)
+            onError?.(`Failed to save: ${result.statusText}`)
         }
         // Remove the current optInRequest from the list
         setOptInRequests(optInRequests.filter((o) => o.id !== optInRequest.id))
