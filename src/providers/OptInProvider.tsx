@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, useEffect, useState } from 'react'
+import { Fragment, ReactElement, ReactNode, useEffect, useState } from 'react'
 import { DEFAULT_BASE_URL } from '../config'
 import { OptInDialog } from '../index'
 import IOptInRequest from '../models/OptInRequest.dto'
@@ -10,6 +10,12 @@ interface PolicyProviderProps {
     children: ReactNode
     apiBaseUrl?: string
     markdownClassName?: string
+    dialogRender?: (props: {
+        open: boolean
+        optInRequest: IOptInRequest
+        onClose: () => void
+        onOptIn: (optInRequest: IOptInRequest, agree: boolean) => void
+    }) => ReactElement
     onError?: (message: string) => void
 }
 
@@ -56,6 +62,7 @@ export default function OptInProvider({
     children,
     apiBaseUrl,
     markdownClassName,
+    dialogRender,
     onError = console.error,
 }: PolicyProviderProps) {
     const [optInRequests, setOptInRequests] = useState<(IOptInRequest & { open: boolean })[]>([])
@@ -125,15 +132,25 @@ export default function OptInProvider({
         <Fragment>
             {children}
             {optInRequests.length > 0 && (
-                <OptInDialog
-                    open={optInRequests[0].open}
-                    optInRequest={optInRequests[0]}
-                    onClose={() =>
-                        setOptInRequests(optInRequests.filter((o) => o.id !== optInRequests[0].id))
-                    }
-                    onOptIn={handleOptIn}
-                    className={markdownClassName}
-                />
+                dialogRender ? 
+                    dialogRender({
+                        open: optInRequests[0].open,
+                        optInRequest: optInRequests[0],
+                        onClose: () => {
+                            setOptInRequests(optInRequests.filter((o) => o.id !== optInRequests[0].id))
+                        },
+                        onOptIn: handleOptIn,
+                    }) : (
+                    <OptInDialog
+                        open={optInRequests[0].open}
+                        optInRequest={optInRequests[0]}
+                        onClose={() =>
+                            setOptInRequests(optInRequests.filter((o) => o.id !== optInRequests[0].id))
+                        }
+                        onOptIn={handleOptIn}
+                        className={markdownClassName}
+                    />
+                )
             )}
         </Fragment>
     )
