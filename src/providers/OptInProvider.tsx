@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, useEffect, useState } from 'react'
+import { Fragment, ReactElement, ReactNode, useEffect, useState } from 'react'
 import { DEFAULT_BASE_URL } from '../config'
 import { OptInDialog } from '../index'
 import IOptInRequest from '../models/OptInRequest.dto'
@@ -10,6 +10,18 @@ interface PolicyProviderProps {
     children: ReactNode
     apiBaseUrl?: string
     markdownClassName?: string
+    dialogRender?: (props: {
+        open: boolean
+        optInRequest: IOptInRequest
+        onClose: () => void
+        onOptIn: (
+            optInRequest: IOptInRequest,
+            agree: boolean,
+            onSuccess?: ()=> void,
+            onError?: (message:string)=> void
+        ) => Promise<void>
+    }) => ReactElement
+    onError?: (message: string) => void
 }
 
 function checkAndGetUserId(
@@ -55,18 +67,21 @@ export default function OptInProvider({
     children,
     apiBaseUrl,
     markdownClassName,
+    dialogRender,
+    onError = console.error,
 }: PolicyProviderProps) {
     const [optInRequests, setOptInRequests] = useState<(IOptInRequest & { open: boolean })[]>([])
     const baseUrl = apiBaseUrl || DEFAULT_BASE_URL
     userId = checkAndGetUserId(userProperties) || userId
 
     useEffect(() => {
+        
         if (!serviceId) {
-            console.error('`serviceId` is missing')
+            onError?.('`serviceId` is missing')
             return
         }
         if (!userId) {
-            console.error('`userId` are required either as a `props` value or in `userProperties`')
+            onError?.('`userId` are required either as a `props` value or in `userProperties`')
             return
         }
         ;(async () => {
@@ -91,12 +106,17 @@ export default function OptInProvider({
                 setOptInRequests(data.optInRequests.map((o) => ({ ...o, open: true })))
             } catch (e) {
                 const error = e as Error
-                console.error(`Error while fetching optInRequests: ${error.message}`)
+                onError?.(`Error while fetching optInRequests: ${error.message}`)
             }
         })()
     }, [serviceId, userId, userProperties])
 
-    const handleOptIn = async (optInRequest: IOptInRequest, agree: boolean) => {
+    const handleOptIn = async (
+        optInRequest: IOptInRequest,
+        agree: boolean,
+        onSuccess?: () => void,
+        _onError?: (message: string) => void
+    ) => {
         const url = `${baseUrl}/api/opt-ins?sid=${serviceId}`
         const result = await fetch(new URL(url), {
             method: 'POST',
@@ -111,10 +131,17 @@ export default function OptInProvider({
             }),
         })
         if (result.status !== 200) {
-            throw new Error(`Failed to save: ${result.statusText}`)
+            onError?.(`Failed to save: ${result.statusText}`)
+            _onError?.(`Failed to save: ${result.statusText}`)
+            return
         }
         // Remove the current optInRequest from the list
+        onSuccess?.()
         setOptInRequests(optInRequests.filter((o) => o.id !== optInRequest.id))
+    }
+
+    const handleOnClose = () => {
+        setOptInRequests(optInRequests.filter((o) => o.id !== optInRequests[0].id))
     }
 
     // This should cover up the entire screen when not hidden and show the dialog
@@ -122,15 +149,21 @@ export default function OptInProvider({
         <Fragment>
             {children}
             {optInRequests.length > 0 && (
-                <OptInDialog
-                    open={optInRequests[0].open}
-                    optInRequest={optInRequests[0]}
-                    onClose={() =>
-                        setOptInRequests(optInRequests.filter((o) => o.id !== optInRequests[0].id))
-                    }
-                    onOptIn={handleOptIn}
-                    className={markdownClassName}
-                />
+                dialogRender ? 
+                    dialogRender({
+                        open: optInRequests[0].open,
+                        optInRequest: optInRequests[0],
+                        onClose: handleOnClose,
+                        onOptIn: handleOptIn,
+                    }) : (
+                    <OptInDialog
+                        open={optInRequests[0].open}
+                        optInRequest={optInRequests[0]}
+                        onClose={handleOnClose}
+                        onOptIn={handleOptIn}
+                        className={markdownClassName}
+                    />
+                )
             )}
         </Fragment>
     )
