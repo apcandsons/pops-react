@@ -1,38 +1,43 @@
 {
-  "name": "@apcandsons/pops-react",
-  "version": "0.1.12",
-  "description": "",
-  "main": "dist/index.js",
-  "types": "dist/types/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "test": "vitest"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
-    "markdown-to-jsx": "^7.5.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.5.3",
-    "@types/react": "^18.3.5",
-    "cpx": "^1.5.0",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.5",
-    "next": "^14.2.7",
-    "prettier": "^3.3.3",
-    "prettier-plugin-organize-imports": "^4.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.5.4",
-    "vitest": "^2.0.5"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/apcandsons/pops-react.git"
-  }
+    "name": "@apcandsons/pops-react",
+    "version": "0.1.12",
+    "description": "",
+    "main": "dist/index.js",
+    "types": "dist/types/index.d.ts",
+    "scripts": {
+        "lint": "run-s lint:*",
+        "lint:app": "eslint .",
+        "lint:ts": "tsc --noEmit",
+        "format": "prettier --write .",
+        "build": "tsc",
+        "test": "vitest"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@emotion/react": "^11.13.3",
+        "@emotion/styled": "^11.13.0",
+        "markdown-to-jsx": "^7.5.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.5.3",
+        "@types/react": "^18.3.5",
+        "cpx": "^1.5.0",
+        "eslint": "^8",
+        "eslint-config-next": "14.2.5",
+        "next": "^14.2.7",
+        "npm-run-all2": "^7.0.1",
+        "prettier": "^3.3.3",
+        "prettier-plugin-organize-imports": "^4.0.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "ts-loader": "^9.5.1",
+        "typescript": "^5.5.4",
+        "vitest": "^2.0.5"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/apcandsons/pops-react.git"
+    }
 }
