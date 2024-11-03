@@ -17,8 +17,8 @@ interface PolicyProviderProps {
         onOptIn: (
             optInRequest: IOptInRequest,
             agree: boolean,
-            onSuccess?: ()=> void,
-            onError?: (message:string)=> void
+            onSuccess?: () => void,
+            onError?: (message: string) => void,
         ) => Promise<void>
     }) => ReactElement
     onError?: (message: string) => void
@@ -75,7 +75,6 @@ export default function OptInProvider({
     userId = checkAndGetUserId(userProperties) || userId
 
     useEffect(() => {
-        
         if (!serviceId) {
             onError?.('`serviceId` is missing')
             return
@@ -115,7 +114,7 @@ export default function OptInProvider({
         optInRequest: IOptInRequest,
         agree: boolean,
         onSuccess?: () => void,
-        _onError?: (message: string) => void
+        _onError?: (message: string) => void,
     ) => {
         const url = `${baseUrl}/api/opt-ins?sid=${serviceId}`
         const result = await fetch(new URL(url), {
@@ -148,14 +147,15 @@ export default function OptInProvider({
     return (
         <Fragment>
             {children}
-            {optInRequests.length > 0 && (
-                dialogRender ? 
+            {optInRequests.length > 0 &&
+                (dialogRender ? (
                     dialogRender({
                         open: optInRequests[0].open,
                         optInRequest: optInRequests[0],
                         onClose: handleOnClose,
                         onOptIn: handleOptIn,
-                    }) : (
+                    })
+                ) : (
                     <OptInDialog
                         open={optInRequests[0].open}
                         optInRequest={optInRequests[0]}
@@ -163,8 +163,7 @@ export default function OptInProvider({
                         onOptIn={handleOptIn}
                         className={markdownClassName}
                     />
-                )
-            )}
+                ))}
         </Fragment>
     )
 }

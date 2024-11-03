@@ -1,5 +1,5 @@
 import Markdown from 'markdown-to-jsx'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DEFAULT_BASE_URL } from '../config'
 
 interface GetPolicyProps {
@@ -9,7 +9,7 @@ interface GetPolicyProps {
     version?: 'latest' | 'next'
 }
 
-interface PolicyProps extends Omit<GetPolicyProps, 'baseUrl'>{
+interface PolicyProps extends Omit<GetPolicyProps, 'baseUrl'> {
     className?: string
     onError?: (message: string) => void
     _baseUrlOverride?: string
@@ -22,12 +22,7 @@ interface PolicyProps extends Omit<GetPolicyProps, 'baseUrl'>{
  * @param version - 'latest' or 'next'
  * @param baseUrl
  */
-async function fetchPolicy({
-    serviceId,
-    policyKey,
-    version,
-    baseUrl,
-}: GetPolicyProps) {
+async function fetchPolicy({ serviceId, policyKey, version, baseUrl }: GetPolicyProps) {
     const url = new URL(`${baseUrl}/api/policies`)
     url.searchParams.append('sid', serviceId)
     url.searchParams.append('pkey', policyKey)
@@ -45,7 +40,7 @@ async function fetchPolicy({
         throw new Error(`Policy Unavailable: ${result.status}`)
     }
 
-    const data = await result.json() as {
+    const data = (await result.json()) as {
         key: string
         version: number
         title: string
@@ -67,7 +62,7 @@ async function fetchPolicy({
                 key: nextVersion.policyId,
                 version: nextVersion.version,
                 title: nextVersion.title,
-                content: nextVersion.content
+                content: nextVersion.content,
             }
         } else {
             throw new Error(`Policy Unavailable: No future versions`)
@@ -77,7 +72,7 @@ async function fetchPolicy({
             key: data.key,
             version: data.version,
             title: data.title,
-            content: data.content
+            content: data.content,
         }
     }
 }
@@ -93,7 +88,7 @@ export default function Policy({
     className,
     version = 'latest',
     onError,
-    _baseUrlOverride
+    _baseUrlOverride,
 }: PolicyProps) {
     const [text, setText] = useState('')
     const baseUrl = _baseUrlOverride || DEFAULT_BASE_URL
@@ -105,7 +100,7 @@ export default function Policy({
                     serviceId,
                     policyKey,
                     version,
-                    baseUrl
+                    baseUrl,
                 })
                 setText(`# ${data.title}\n\n${data.content}`)
             } catch (e) {

@@ -1,12 +1,10 @@
 {
-  "organizeImportsSkipDestructiveCodeActions": false,
-  "printWidth": 105,
-  "semi": false,
-  "singleQuote": true,
-  "tabWidth": 4,
-  "trailingComma": "all",
-  "useTabs": false,
-  "plugins": [
-    "prettier-plugin-organize-imports"
-  ]
+    "organizeImportsSkipDestructiveCodeActions": false,
+    "printWidth": 105,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "all",
+    "useTabs": false,
+    "plugins": ["prettier-plugin-organize-imports"]
 }

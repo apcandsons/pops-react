@@ -92,7 +92,10 @@ export default function OptInDialog({
                                 <div onClick={handleSkipDays(30)}>30日間スキップする</div>
                             </ButtonWithOptions>
                         ) : (
-                            <button css={buttonTextDisabled} title="本内容は必ず同意いただく必要があります">
+                            <button
+                                css={buttonTextDisabled}
+                                title="本内容は必ず同意いただく必要があります"
+                            >
                                 今はスキップする
                             </button>
                         )}
@@ -142,7 +145,7 @@ const dialogFooter = css`
     flex-direction: row;
     gap: 10px;
     @media (max-width: 1024px) {
-      flex-direction: column;
+        flex-direction: column;
     }
 `
 
