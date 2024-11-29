@@ -1,6 +1,6 @@
 {
   "name": "@apcandsons/pops-react",
-  "version": "0.1.12",
+  "version": "0.1.14",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
